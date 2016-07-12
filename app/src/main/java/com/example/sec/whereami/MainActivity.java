@@ -2,16 +2,24 @@ package com.example.sec.whereami;
 
 import android.os.Bundle;
 import android.support.v7.app.AppCompatActivity;
+import android.util.Log;
 import android.view.Menu;
 import android.view.MenuInflater;
 import android.view.MenuItem;
 import android.widget.RelativeLayout;
-import android.widget.Toast;
 
+import net.daum.android.map.util.URLEncoder;
 import net.daum.mf.map.api.MapPoint;
+import net.daum.mf.map.api.MapReverseGeoCoder;
 import net.daum.mf.map.api.MapView;
 
-public class MainActivity extends AppCompatActivity implements MapView.CurrentLocationEventListener {
+
+import java.io.BufferedReader;
+import java.io.InputStreamReader;
+import java.net.URL;
+
+
+public class MainActivity extends AppCompatActivity implements MapView.CurrentLocationEventListener, MapReverseGeoCoder.ReverseGeoCodingResultListener {
     MapView mapView;
 
     @Override
@@ -25,6 +33,7 @@ public class MainActivity extends AppCompatActivity implements MapView.CurrentLo
 
         RelativeLayout container = (RelativeLayout) findViewById(R.id.map_view);
         container.addView(mapView);
+
 
     }
 
@@ -43,10 +52,9 @@ public class MainActivity extends AppCompatActivity implements MapView.CurrentLo
 
     @Override
     public void onCurrentLocationUpdate(MapView mapView, MapPoint mapPoint, float v) {
-        MapPoint.GeoCoordinate mapPointGeo = mapPoint.getMapPointGeoCoord();
+        MapReverseGeoCoder mapGeoCoder = new MapReverseGeoCoder("4b84abed6f29d6e833dc233ec40243ed", mapPoint, this, this );
+        mapGeoCoder.startFindingAddress();
 
-        Toast.makeText(MainActivity.this, "위도 : "+mapPointGeo.latitude+"\n경도 : "+mapPointGeo.longitude, Toast.LENGTH_SHORT).show();
-        // 현재위치 바뀔때마다 Toast
     }
 
     @Override
@@ -61,6 +69,16 @@ public class MainActivity extends AppCompatActivity implements MapView.CurrentLo
 
     @Override
     public void onCurrentLocationUpdateCancelled(MapView mapView) {
+
+    }
+
+    @Override
+    public void onReverseGeoCoderFoundAddress(MapReverseGeoCoder mapReverseGeoCoder, String s) {
+
+    }
+
+    @Override
+    public void onReverseGeoCoderFailedToFindAddress(MapReverseGeoCoder mapReverseGeoCoder) {
 
     }
 }
