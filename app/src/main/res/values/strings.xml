@@ -1,0 +1,133 @@
+<resources>
+    <string name="app_name">WhereAmI</string>
+
+    <string-array name="myvariablename_keys">
+        <item>공항</item>
+        <item>놀이 공원</item>
+        <item>수족관</item>
+        <item>미술관</item>
+        <item>ATM</item>
+        <item>빵집</item>
+        <item>은행</item>
+        <item>바</item>
+        <item>미용실</item>
+        <item>자전거 가게</item>
+        <item>서점</item>
+        <item>볼링장</item>
+        <item>버스 정류장</item>
+        <item>카페</item>
+        <item>캠프장</item>
+        <item>자동차 판매원</item>
+        <item>자동차 임대</item>
+        <item>자동차 수리</item>
+        <item>세차</item>
+        <item>교회</item>
+        <item>시청</item>
+        <item>옷가게</item>
+        <item>편의점</item>
+        <item>법원</item>
+        <item>백화점</item>
+        <item>전자제품 매장</item>
+        <item>대사관</item>
+        <item>소방서</item>
+        <item>꽃집</item>
+        <item>장례식장</item>
+        <item>가구 상점</item>
+        <item>주유소</item>
+        <item>슈퍼</item>
+        <item>체육관</item>
+        <item>철물점</item>
+        <item>가정용 제품 가게</item>
+        <item>병원</item>
+        <item>보험회사</item>
+        <item>보석가게</item>
+        <item>세탁</item>
+        <item>변호사</item>
+        <item>도서관</item>
+        <item>술집</item>
+        <item>지방 관청</item>
+        <item>영화관</item>
+        <item>박물관</item>
+        <item>나이트 클럽</item>
+        <item>공원</item>
+        <item>주차장</item>
+        <item>경찰</item>
+        <item>우체국</item>
+        <item>레스토랑</item>
+        <item>학교</item>
+        <item>신발가게</item>
+        <item>온천</item>
+        <item>경기장</item>
+        <item>지하철역</item>
+        <item>택시 승강장</item>
+        <item>기차역</item>
+        <item>여행사</item>
+        <item>대학</item>
+        <item>동물원</item>
+    </string-array>
+
+    <string-array name="myvariablename_values">
+        <item>airport</item>
+        <item>amusement_park</item>
+        <item>aquarium</item>
+        <item>art_gallery</item>
+        <item>atm</item>
+        <item>bakery</item>
+        <item>bank</item>
+        <item>bar</item>
+        <item>beauty_salon</item>
+        <item>bicycle_store</item>
+        <item>book_store</item>
+        <item>bowling_alley</item>
+        <item>bus_station</item>
+        <item>cafe</item>
+        <item>campground</item>
+        <item>car_dealer</item>
+        <item>car_rental</item>
+        <item>car_repair</item>
+        <item>car_wash</item>
+        <item>church</item>
+        <item>city_hall</item>
+        <item>clothing_store</item>
+        <item>convenience_store</item>
+        <item>courthouse</item>
+        <item>department_store</item>
+        <item>electronics_store</item>
+        <item>embassy</item>
+        <item>fire_station</item>
+        <item>florist</item>
+        <item>funeral_home</item>
+        <item>furniture_store</item>
+        <item>gas_station</item>
+        <item>grocery_or_supermarket</item>
+        <item>gym</item>
+        <item>hardware_store</item>
+        <item>home_goods_store</item>
+        <item>hospital</item>
+        <item>insurance_agency</item>
+        <item>jewelry_store</item>
+        <item>laundry</item>
+        <item>lawyer</item>
+        <item>library</item>
+        <item>liquor_store</item>
+        <item>local_government_office</item>
+        <item>movie_theater</item>
+        <item>museum</item>
+        <item>night_club</item>
+        <item>park</item>
+        <item>parking</item>
+        <item>police</item>
+        <item>post_office</item>
+        <item>restaurant</item>
+        <item>school</item>
+        <item>shoe_store</item>
+        <item>spa</item>
+        <item>stadium</item>
+        <item>subway_station</item>
+        <item>taxi_stand</item>
+        <item>train_station</item>
+        <item>travel_agency</item>
+        <item>university</item>
+        <item>zoo</item>
+    </string-array>
+</resources>
