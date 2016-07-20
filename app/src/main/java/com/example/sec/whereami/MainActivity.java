@@ -27,7 +27,10 @@ import net.daum.mf.map.api.MapView;
 
 import org.json.simple.parser.JSONParser;
 
+import java.util.HashMap;
+import java.util.Iterator;
 import java.util.Locale;
+import java.util.TreeMap;
 
 public class MainActivity extends AppCompatActivity implements
         MapView.CurrentLocationEventListener, // 현재위치를 파악한다.
@@ -79,15 +82,14 @@ public class MainActivity extends AppCompatActivity implements
         flipper=(ViewFlipper)findViewById(R.id.viewFlipper);
         nameText = (EditText)findViewById(R.id.nameText);
         current_Text = (TextView)findViewById(R.id.currentLOC);
-
         mapView.setOnTouchListener(new View.OnTouchListener() {
             @Override
             public boolean onTouch(View v, MotionEvent event) {
                 return true;
             }
         });
-    }
 
+    }
     @Override /* 트래킹 모드가 ON일 때 사용자의 현재 위치가 업데이트 될 때 불려지는 함수 입니다. */
     public void onCurrentLocationUpdate(MapView mapView, MapPoint mapPoint, float v) {
         /* 현재위치의 위도 경도 값 출력 */
@@ -97,6 +99,7 @@ public class MainActivity extends AppCompatActivity implements
         /* 위도 경도 더한 통해 url을 가져오는 함수 */
         if(search_Mode == false) { //
             String url = localSeeker.getNearPlace(lat, lng);
+            Log.d("URL: ", url);
             ps.execute("NEAR", url);
             _tts.speak("검색결과가 갱신되었습니다.", TextToSpeech.QUEUE_FLUSH, null);
         }
@@ -223,24 +226,6 @@ public class MainActivity extends AppCompatActivity implements
                 searchPlacePs(jsonInfo);  //Google Place API를 이용해 처리한다.
             this.cancel(true);
         }
-        /* 현재위치 데이터 파싱 */
-        public void setCurPlace(String jsonData) {
-            String res = null;
-            try {
-                JSONParser jsonParser = new JSONParser();
-                org.json.simple.JSONObject jsonObject = (org.json.simple.JSONObject) jsonParser.parse(jsonData);
-                org.json.simple.JSONArray result = (org.json.simple.JSONArray) jsonObject.get("results");
-                for (int i = 0; i < result.size(); i++) {
-                    org.json.simple.JSONObject testObject = (org.json.simple.JSONObject) result.get(i);
-                    res = (String) testObject.get("name");
-                    if (isStringDouble(res))
-                        continue;
-                }
-            }catch(Exception e){
-                e.printStackTrace();
-            }
-            current_Text.setText(res);
-        }
 
         /* Google Place API를 위한 함수 */
         public void searchPlacePs(String jsonData) {
@@ -275,6 +260,8 @@ public class MainActivity extends AppCompatActivity implements
         }
         /* Google Geo API를 위한 함수 */
         public void nearPlacePs(String jsonData) {
+            HashMap<Integer, String> hashMap = new HashMap();
+
             try{
                 JSONParser jsonParser = new JSONParser();
                 org.json.simple.JSONObject jsonObject = (org.json.simple.JSONObject) jsonParser.parse(jsonData);
@@ -284,6 +271,9 @@ public class MainActivity extends AppCompatActivity implements
                 address[0] = "주변 건물 검색결과";
                 for(int i=0; i<result.size(); i++) {
                     org.json.simple.JSONObject object = (org.json.simple.JSONObject)result.get(i);
+
+                    String formatted_address = (String)object.get("formatted_address");
+
                     org.json.simple.JSONArray address_components  = ( org.json.simple.JSONArray) object.get("address_components");
                     org.json.simple.JSONObject name = (org.json.simple.JSONObject) address_components.get(0);
                     String res = (String)name.get("long_name");
@@ -299,7 +289,16 @@ public class MainActivity extends AppCompatActivity implements
                     res += "  " + String.valueOf(dirs) + "시방향";
                     Toast.makeText(getApplicationContext(),"result: " + res, Toast.LENGTH_SHORT).show();
                     address[addridx++] = res;
+                    hashMap.put(dist,formatted_address);
                 }
+
+                TreeMap<Integer, String> treeMap = new TreeMap<Integer, String>( hashMap );
+                Iterator<Integer> treeMapIter = treeMap.keySet().iterator();
+                treeMapIter.hasNext();
+                int key = treeMapIter.next();
+                String value = treeMap.get( key );
+                current_Text.setText(value);
+
                 GeoList geoList = new GeoList(MainActivity.this, address);
                 list.setAdapter(geoList);// 추가
             } catch (Exception e) {

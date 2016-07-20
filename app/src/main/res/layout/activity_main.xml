@@ -12,47 +12,48 @@
 
         <ImageButton
             android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
+            android:layout_height="match_parent"
             android:layout_weight="1"
             android:background="#00ff0000"
-            android:src="@drawable/mylocation"
+            android:src="@drawable/around_loc"
             android:id="@+id/tracking"
             android:onClick="OnOptionClicked"
             android:nestedScrollingEnabled="false" />
 
         <ImageButton
             android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
+            android:layout_height="match_parent"
             android:layout_weight="1"
             android:background="#00ff0000"
-            android:src="@drawable/settings" />
+            android:src="@drawable/my_loc" />
 
         <ImageButton
             android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
+            android:layout_height="match_parent"
             android:layout_weight="1"
-            android:src="@drawable/open"
+            android:src="@drawable/set_direct"
             android:background="#00ff0000" />
 
         <ImageButton
             android:id="@+id/searchOPT"
             android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
+            android:layout_height="match_parent"
             android:layout_weight="1"
             android:background="#00ff0000"
-            android:src="@drawable/close"
+            android:src="@drawable/picker"
             android:onClick="OnOptionClicked" />
 
         <EditText
-            android:layout_width="110dp"
-            android:layout_height="wrap_content"
+            android:layout_width="wrap_content"
+            android:layout_height="match_parent"
             android:hint="검색어를 입력하세요."
             android:textSize="5pt"
-            android:id="@+id/nameText" />
+            android:id="@+id/nameText"
+            android:layout_weight="2" />
 
         <ImageButton
             android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
+            android:layout_height="match_parent"
             android:layout_weight="1"
             android:background="#00ff0000"
             android:src="@drawable/search"
@@ -61,7 +62,7 @@
 
         <ImageButton
             android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
+            android:layout_height="match_parent"
             android:layout_weight="1"
             android:background="#00ff0000"
             android:src="@drawable/settings"
@@ -73,36 +74,41 @@
         android:layout_width="match_parent"
         android:layout_height="match_parent"
         android:id="@+id/viewFlipper">
+
         <FrameLayout
             android:layout_width="match_parent"
             android:layout_height="match_parent">
-        <RelativeLayout
-            android:id="@+id/map_view"
-            android:layout_width="match_parent"
-            android:layout_height="match_parent" >
 
-            <ImageView
-                android:layout_width="wrap_content"
-                android:layout_height="wrap_content"
-                android:id="@+id/extend"
-                android:layout_gravity="right|top"
-                android:src="@drawable/extend"
-                android:onClick="onInfoClicked"
-                android:layout_alignParentTop="true"
-                android:layout_alignParentRight="true"
-                android:layout_alignParentEnd="true"
-                android:layout_marginTop="44dp" />
+            <RelativeLayout
+                android:id="@+id/map_view"
+                android:layout_width="match_parent"
+                android:layout_height="match_parent"
+                android:layout_gravity="center">
+
+            </RelativeLayout>
 
             <TextView
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
                 android:id="@+id/currentLOC"
-                android:layout_alignParentTop="true"
-                android:layout_centerHorizontal="true"
-                android:gravity="center" />
+                android:gravity="center"
+                android:layout_gravity="top"
+                android:text="현재 위치"
+                android:textSize="10dp" />
 
-        </RelativeLayout>
+            <ImageView
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:id="@+id/extend"
+                android:layout_gravity="top|right"
+                android:src="@drawable/extend"
+                android:onClick="onInfoClicked"
+                android:layout_alignParentTop="true"
+                android:layout_alignParentRight="true"
+                android:layout_alignParentEnd="true"
+                android:layout_marginTop="15dp" />
         </FrameLayout>
+
         <FrameLayout
             android:layout_width="match_parent"
             android:layout_height="match_parent">
@@ -117,7 +123,8 @@
                 android:id="@+id/exit"
                 android:layout_gravity="right|top"
                 android:src="@drawable/exit"
-                android:onClick="onexitClicked" />
+                android:onClick="onexitClicked"
+                android:layout_marginTop="15dp" />
         </FrameLayout>
 
     </ViewFlipper>
