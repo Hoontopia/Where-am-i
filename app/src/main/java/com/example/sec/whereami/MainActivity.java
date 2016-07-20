@@ -49,7 +49,6 @@ public class MainActivity extends AppCompatActivity implements
     String[] values;
     LocalSeeker localSeeker;
     MapView mapView;
-    MapReverseGeoCoder mReverseGeoCoder;
     TextToSpeech _tts;
     PickerDlg pickerDlg;
     boolean _ttsActive = false;
@@ -61,6 +60,7 @@ public class MainActivity extends AppCompatActivity implements
     CpsManager cpsManager;
     ViewFlipper flipper;
     ListView list;
+
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
@@ -101,13 +101,11 @@ public class MainActivity extends AppCompatActivity implements
             String url = localSeeker.getNearPlace(lat, lng);
             Log.d("URL: ", url);
             ps.execute("NEAR", url);
-            _tts.speak("검색결과가 갱신되었습니다.", TextToSpeech.QUEUE_FLUSH, null);
         }
         else if(search_Mode == true){
             String url = localSeeker.searchPlace(lat, lng, radius, types, name);
             Log.d("URL: ", url);
             ps.execute("SEARCH", url);
-            _tts.speak("검색결과가 갱신되었습니다.", TextToSpeech.QUEUE_FLUSH, null);
         }
         /*  현재위치 Reverse Geo-Coding 결과를 비동기적으로 통보받고 싶을때 */
         //mReverseGeoCoder = new MapReverseGeoCoder(API_Key.DAUM_KEY, mapView.getMapCenterPoint(), this, this);
@@ -165,10 +163,12 @@ public class MainActivity extends AppCompatActivity implements
                     ps = new JsonFormatPs();
                     Log.d("URL: ", url);
                     ps.execute("SEARCH", url);
-                    _tts.speak("검색결과가 갱신되었습니다.", TextToSpeech.QUEUE_FLUSH, null);
                     flipper.showNext();
                 }
                 break;
+            case R.id.currentLOC_call:
+                String currentLOC = current_Text.getText().toString();
+                _tts.speak(currentLOC, TextToSpeech.QUEUE_FLUSH, null);
             case R.id.tts_Setting:
         }
     }
@@ -314,10 +314,7 @@ public class MainActivity extends AppCompatActivity implements
             return false;
         }
     }
-    @Override
-    protected void onStart() {super.onStart();}
-    @Override
-    protected void onStop() {super.onStop();}
+
     public void onInfoClicked(View view) { /* 리스트뷰 띄우기 */ flipper.showNext(); }
     public void onexitClicked(View view) { /* 지도복귀 */ flipper.showPrevious();}
     @Override
