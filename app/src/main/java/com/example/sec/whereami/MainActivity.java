@@ -39,6 +39,8 @@ public class MainActivity extends AppCompatActivity implements
         MapView.MapViewEventListener, /* 맵에 대한 행동을 현재 액티비티에서 관리한다 */
         SensorEventListener
 {
+    Toast toast;
+
     String lat = null;
     String lng = null;
     static String name = null; //
