@@ -1,6 +1,7 @@
 package com.example.sec.whereami;
 
 import android.content.Context;
+import android.content.DialogInterface;
 import android.hardware.Sensor;
 import android.hardware.SensorEvent;
 import android.hardware.SensorEventListener;
@@ -10,11 +11,13 @@ import android.net.NetworkInfo;
 import android.os.AsyncTask;
 import android.os.Bundle;
 import android.speech.tts.TextToSpeech;
+import android.support.v7.app.AlertDialog;
 import android.support.v7.app.AppCompatActivity;
 import android.util.Log;
 import android.view.MotionEvent;
 import android.view.View;
 import android.widget.EditText;
+import android.widget.ImageButton;
 import android.widget.ListView;
 import android.widget.RelativeLayout;
 import android.widget.TextView;
@@ -39,11 +42,11 @@ public class MainActivity extends AppCompatActivity implements
         MapView.MapViewEventListener, /* 맵에 대한 행동을 현재 액티비티에서 관리한다 */
         SensorEventListener
 {
-    Toast toast;
 
+    RelativeLayout container;
     String lat = null;
     String lng = null;
-    static String name = null; //
+    static String name = null;
     static String typename = null;
     static String types = null;
     static String radius = "50";
@@ -51,6 +54,7 @@ public class MainActivity extends AppCompatActivity implements
     String[] values;
     LocalSeeker localSeeker;
     MapView mapView;
+    MapReverseGeoCoder mReverseGeoCoder;
     TextToSpeech _tts;
     PickerDlg pickerDlg;
     boolean _ttsActive = false;
@@ -63,35 +67,76 @@ public class MainActivity extends AppCompatActivity implements
     ViewFlipper flipper;
     ListView list;
 
+    ImageButton[] imageButtons;
+
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_main);
-        localSeeker = new LocalSeeker();
-        keys = this.getResources().getStringArray(R.array.myvariablename_keys);
-        values = this.getResources().getStringArray(R.array.myvariablename_values);
-        pickerDlg = new PickerDlg(this, keys, values);
-        mapView = new MapView(this);
-        mapView.setDaumMapApiKey(API_Key.DAUM_KEY);
-        mapView.setCurrentLocationEventListener(this); //리스너 등록 (MainActivity가 지도맵의 이벤트를 관리한다)
-        mapView.setMapViewEventListener(this);  // 리스너 등록 (MainActivity가 지도맵을 관리한다)
-        RelativeLayout container = (RelativeLayout) findViewById(R.id.map_view);
-        container.addView(mapView);
-        cpsManager = new CpsManager();
-        mSensorManager = (SensorManager) getSystemService(SENSOR_SERVICE);
-        mOrientation = mSensorManager.getDefaultSensor(Sensor.TYPE_ORIENTATION);
+        imageButtons = new ImageButton[6];
+        if(isNetworkAvailable()==false){
+            AlertDialog.Builder builder = new AlertDialog.Builder(this);
+            builder.setTitle("인터넷 연결상태 불량")
+                    .setMessage("인터넷을 연결상태를 확인 해주세요")
+                    .setCancelable(false)
+                    .setPositiveButton("확인", new DialogInterface.OnClickListener(){
+                        public void onClick(DialogInterface dialog, int whichButton){
+                            finish();
+                        }
+                    });
+            AlertDialog dialog = builder.create();
+            dialog.show();
+        }
+        else {
+            mapView = new MapView(this);
+            mapView.setDaumMapApiKey(API_Key.DAUM_KEY);
+            mapView.setCurrentLocationEventListener(this); //리스너 등록 (MainActivity가 지도맵의 이벤트를 관리한다)
+            mapView.setMapViewEventListener(this);  // 리스너 등록 (MainActivity가 지도맵을 관리한다)
+            container = (RelativeLayout) findViewById(R.id.map_view);
+            container.addView(mapView);
+            setAccessibilityIgnore(mapView);
+            mapView.setOnTouchListener(new View.OnTouchListener() {
+                @Override
+                public boolean onTouch(View v, MotionEvent event) {
+                    return true;
+                }
+            });
+        }
         list = (ListView)findViewById(R.id.list);
         flipper=(ViewFlipper)findViewById(R.id.viewFlipper);
         nameText = (EditText)findViewById(R.id.nameText);
         current_Text = (TextView)findViewById(R.id.currentLOC);
-        mapView.setOnTouchListener(new View.OnTouchListener() {
-            @Override
-            public boolean onTouch(View v, MotionEvent event) {
-                return true;
-            }
-        });
+        cpsManager = new CpsManager();
+        mSensorManager = (SensorManager) getSystemService(SENSOR_SERVICE);
+        mOrientation = mSensorManager.getDefaultSensor(Sensor.TYPE_ORIENTATION);
+        localSeeker = new LocalSeeker();
+        keys = this.getResources().getStringArray(R.array.myvariablename_keys);
+        values = this.getResources().getStringArray(R.array.myvariablename_values);
+        pickerDlg = new PickerDlg(this, keys, values);
 
+
+
+        imageButtons[0] = (ImageButton)findViewById(R.id.tracking);
+        imageButtons[1] = (ImageButton)findViewById(R.id.addressInfo);
+        imageButtons[2] = (ImageButton)findViewById(R.id.안내방식);
+        imageButtons[3] = (ImageButton)findViewById(R.id.searchOPT);
+        imageButtons[4] = (ImageButton)findViewById(R.id.search);
+        imageButtons[5] = (ImageButton)findViewById(R.id.tts_Setting);
+        setAccessibilityIgnore(current_Text);
     }
+
+    public static void setAccessibilityIgnore(View view) {
+        view.setClickable(false);
+        view.setFocusable(false);
+        view.setImportantForAccessibility(View.IMPORTANT_FOR_ACCESSIBILITY_NO);
+    }
+
+    public static void setAccessibilitySetting(View view) {
+        view.setClickable(true);
+        view.setFocusable(true);
+        view.setImportantForAccessibility(View.IMPORTANT_FOR_ACCESSIBILITY_YES);
+    }
+
     @Override /* 트래킹 모드가 ON일 때 사용자의 현재 위치가 업데이트 될 때 불려지는 함수 입니다. */
     public void onCurrentLocationUpdate(MapView mapView, MapPoint mapPoint, float v) {
         /* 현재위치의 위도 경도 값 출력 */
@@ -119,6 +164,8 @@ public class MainActivity extends AppCompatActivity implements
         mSensorManager.registerListener(this, mOrientation,
                 SensorManager.SENSOR_DELAY_UI);
         _tts = new TextToSpeech(getApplicationContext(), this);
+        _tts.setLanguage(Locale.KOREA);
+        _ttsActive=true;
     }
     @Override
     protected void onPause() {
@@ -165,29 +212,14 @@ public class MainActivity extends AppCompatActivity implements
                     ps = new JsonFormatPs();
                     Log.d("URL: ", url);
                     ps.execute("SEARCH", url);
+                    _tts.speak("검색결과가 갱신되었습니다.", TextToSpeech.QUEUE_FLUSH, null);
                     flipper.showNext();
                 }
                 break;
-            case R.id.currentLOC_call:
-                String currentLOC = current_Text.getText().toString();
-                _tts.speak(currentLOC, TextToSpeech.QUEUE_FLUSH, null);
             case R.id.tts_Setting:
         }
     }
-    @Override /* 현재위치 주소를 찾은 경우 호출된다. */
-    public void onReverseGeoCoderFoundAddress(MapReverseGeoCoder mapReverseGeoCoder, String s) {
-        mapReverseGeoCoder.toString();
-        onFinishReverseGeoCoding(s);
-    }
-    @Override /* 현재위치 주소를 못찾은 경우 호출된다. */
-    public void onReverseGeoCoderFailedToFindAddress(MapReverseGeoCoder mapReverseGeoCoder) {
-        onFinishReverseGeoCoding("Fail");
-    }
-    private void onFinishReverseGeoCoding(String result) {
-        _tts.setLanguage(Locale.KOREA);
-        _ttsActive=true;
-        _tts.speak("이름 : "+ result, TextToSpeech.QUEUE_FLUSH, null);
-    }
+
     @Override /* 맵을 다 보여줬을때 호출되는 함수*/
     public void onMapViewInitialized(MapView mapView) {
         mapView.setCurrentLocationTrackingMode(MapView.CurrentLocationTrackingMode.TrackingModeOnWithHeading); // 좌표 추적모드 On
@@ -316,9 +348,24 @@ public class MainActivity extends AppCompatActivity implements
             return false;
         }
     }
-
-    public void onInfoClicked(View view) { /* 리스트뷰 띄우기 */ flipper.showNext(); }
-    public void onexitClicked(View view) { /* 지도복귀 */ flipper.showPrevious();}
+    @Override /* 현재위치 주소를 찾은 경우 호출된다. */
+    public void onReverseGeoCoderFoundAddress(MapReverseGeoCoder mapReverseGeoCoder, String s) {}
+    @Override /* 현재위치 주소를 못찾은 경우 호출된다. */
+    public void onReverseGeoCoderFailedToFindAddress(MapReverseGeoCoder mapReverseGeoCoder) {}
+    @Override
+    protected void onStart() {super.onStart();}
+    @Override
+    protected void onStop() {super.onStop();}
+    public void onInfoClicked(View view) { /* 리스트뷰 띄우기 */ flipper.showNext();
+        for(int i=0; i<6; i++)
+            setAccessibilityIgnore(imageButtons[i]);
+        setAccessibilityIgnore(nameText);
+    }
+    public void onexitClicked(View view) { /* 지도복귀 */ flipper.showPrevious();
+        for(int i=0; i<6; i++)
+            setAccessibilitySetting(imageButtons[i]);
+        setAccessibilitySetting(nameText);
+    }
     @Override
     public void onMapViewCenterPointMoved(MapView mapView, MapPoint mapPoint) {}
     @Override

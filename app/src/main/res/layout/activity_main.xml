@@ -11,6 +11,7 @@
         android:padding="5dp" >
 
         <ImageButton
+            android:contentDescription="현재위치"
             android:layout_width="wrap_content"
             android:layout_height="match_parent"
             android:layout_weight="1"
@@ -18,28 +19,32 @@
             android:src="@drawable/around_loc"
             android:id="@+id/tracking"
             android:onClick="OnOptionClicked"
-            android:nestedScrollingEnabled="false" />
+
+            android:nestedScrollingEnabled="false"
+            />
 
         <ImageButton
+            android:id="@+id/addressInfo"
+            android:contentDescription="주소안내"
+            android:nextFocusLeft="@id/tracking"
             android:layout_width="wrap_content"
             android:layout_height="match_parent"
             android:layout_weight="1"
             android:background="#00ff0000"
             android:src="@drawable/my_loc"
-            android:id="@+id/currentLOC_call"
-            android:onClick="OnOptionClicked"
-            android:focusable="false"
-            android:clickable="false" />
+            />
 
         <ImageButton
+            android:id="@+id/안내방식"
+            android:contentDescription="안내방식"
             android:layout_width="wrap_content"
             android:layout_height="match_parent"
             android:layout_weight="1"
             android:src="@drawable/set_direct"
-            android:background="#00ff0000"
-            android:onClick="OnOptionClicked" />
+            android:background="#00ff0000" />
 
         <ImageButton
+            android:contentDescription="검색옵션"
             android:id="@+id/searchOPT"
             android:layout_width="wrap_content"
             android:layout_height="match_parent"
@@ -49,6 +54,7 @@
             android:onClick="OnOptionClicked" />
 
         <EditText
+            android:contentDescription="키워드 검색"
             android:layout_width="wrap_content"
             android:layout_height="match_parent"
             android:hint="검색어를 입력하세요."
@@ -57,6 +63,7 @@
             android:layout_weight="2" />
 
         <ImageButton
+            android:contentDescription="검색"
             android:layout_width="wrap_content"
             android:layout_height="match_parent"
             android:layout_weight="1"
@@ -66,6 +73,7 @@
             android:onClick="OnOptionClicked" />
 
         <ImageButton
+            android:contentDescription="설정"
             android:layout_width="wrap_content"
             android:layout_height="match_parent"
             android:layout_weight="1"
@@ -81,8 +89,10 @@
         android:id="@+id/viewFlipper">
 
         <FrameLayout
+            android:id="@+id/frame1"
             android:layout_width="match_parent"
-            android:layout_height="match_parent">
+            android:layout_height="match_parent"
+            android:focusable="false">
 
             <RelativeLayout
                 android:id="@+id/map_view"
@@ -93,6 +103,7 @@
             </RelativeLayout>
 
             <TextView
+                android:focusable="false"
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
                 android:id="@+id/currentLOC"
@@ -102,6 +113,8 @@
                 android:textSize="10dp" />
 
             <ImageView
+                android:focusable="true"
+                android:contentDescription="검색결과 보기"
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
                 android:id="@+id/extend"
@@ -115,6 +128,7 @@
         </FrameLayout>
 
         <FrameLayout
+            android:id="@+id/frame2"
             android:layout_width="match_parent"
             android:layout_height="match_parent">
             <ListView

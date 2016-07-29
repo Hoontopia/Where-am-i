@@ -10,7 +10,7 @@ import java.net.URL;
  * Created by songjonghun on 2016. 7. 16..
  */
 public class LocalSeeker {
-
+    public static double M_PI = Math.PI;
     public LocalSeeker() {}
 
     /* Google Place API를 이용할경우 */
@@ -32,6 +32,7 @@ public class LocalSeeker {
                 "result_type=premise" + "&" +
                 "key=" + API_Key.GOOGLE_KEY;
     }
+    //"result_type=premise" + "&" +
     /* Url로부터 JSON DATA받아오기 */
     public String downloadFromUrl(String strUrl){
         StringBuilder sb = new StringBuilder();
@@ -61,9 +62,9 @@ public class LocalSeeker {
     }
     /* 위도 경도를 이용해 각도를 계산하는 함수 */
     public int bearingP1toP2(double P1_latitude, double P1_longitude, double P2_latitude, double P2_longitude, float cps) {
-        double y = Math.sin(P2_longitude-P1_longitude) * Math.cos(P2_latitude);
+        double y = Math.sin(Math.abs(P2_longitude-P1_longitude)) * Math.cos(P2_latitude);
         double x = Math.cos(P1_latitude)*Math.sin(P2_latitude) -
-                   Math.sin(P1_latitude)*Math.cos(P2_latitude)*Math.cos(P2_longitude-P1_longitude);
+                   Math.sin(P1_latitude)*Math.cos(P2_latitude)*Math.cos(Math.abs(P2_longitude-P1_longitude));
         double result = Math.atan2(y, x) - cps*Math.PI/180;
         result = (result*180/Math.PI+360)%360;
         return (int)(result/30.0);
@@ -85,4 +86,24 @@ public class LocalSeeker {
     private double deg2rad(double deg){ return (double)(deg * Math.PI / (double)180d);}
     // 주어진 라디언(radian) 값을 도(degree) 값으로 변환
     private double rad2deg(double rad){ return (double)(rad * (double)180d / Math.PI);}
+
+
+    public double DegreeBearing(double lat1, double lng1, double lat2, double lng2) {
+        double dLon = ToRad(lng2-lng1);
+        double dPhi = Math.log(Math.tan(ToRad(lat2)/2+M_PI/4) / Math.tan(ToRad(lat1))/2+M_PI/4);
+        if(Math.abs(dLon) > M_PI)
+            dLon = dLon > 0 ? - (2 * M_PI - dLon) : (2 * M_PI + dLon);
+        return Math.atan2(dLon, dPhi);
+    }
+
+    double ToRad(double degrees) {
+        return degrees * (M_PI / 180);
+    }
+    double ToDegrees(double radians) {
+        return radians * 180 / M_PI;
+    }
+    double ToBearing(double radians) {
+        int temp = (int)ToDegrees(radians) + 360;
+        return temp % 360;
+    }
 }
