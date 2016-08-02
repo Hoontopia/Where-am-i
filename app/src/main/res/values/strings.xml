@@ -2,6 +2,7 @@
     <string name="app_name">WhereAmI</string>
 
     <string-array name="myvariablename_keys">
+        <item>건물</item>
         <item>공항</item>
         <item>놀이 공원</item>
         <item>수족관</item>
@@ -67,6 +68,7 @@
     </string-array>
 
     <string-array name="myvariablename_values">
+        <item>buildings</item>
         <item>airport</item>
         <item>amusement_park</item>
         <item>aquarium</item>

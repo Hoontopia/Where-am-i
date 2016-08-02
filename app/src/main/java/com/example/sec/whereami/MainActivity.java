@@ -54,7 +54,6 @@ public class MainActivity extends AppCompatActivity implements
     String[] values;
     LocalSeeker localSeeker;
     MapView mapView;
-    MapReverseGeoCoder mReverseGeoCoder;
     TextToSpeech _tts;
     PickerDlg pickerDlg;
     boolean _ttsActive = false;
@@ -64,7 +63,7 @@ public class MainActivity extends AppCompatActivity implements
     SensorManager mSensorManager;
     Sensor mOrientation;
     CpsManager cpsManager;
-    ViewFlipper flipper;
+    ViewFlipper flipper, menu_flipeper;
     ListView list;
 
     ImageButton[] imageButtons;
@@ -104,6 +103,8 @@ public class MainActivity extends AppCompatActivity implements
         }
         list = (ListView)findViewById(R.id.list);
         flipper=(ViewFlipper)findViewById(R.id.viewFlipper);
+        menu_flipeper = (ViewFlipper)findViewById(R.id.viewFlipper2);
+
         nameText = (EditText)findViewById(R.id.nameText);
         current_Text = (TextView)findViewById(R.id.currentLOC);
         cpsManager = new CpsManager();
@@ -116,12 +117,12 @@ public class MainActivity extends AppCompatActivity implements
 
 
 
-        imageButtons[0] = (ImageButton)findViewById(R.id.tracking);
-        imageButtons[1] = (ImageButton)findViewById(R.id.addressInfo);
-        imageButtons[2] = (ImageButton)findViewById(R.id.안내방식);
-        imageButtons[3] = (ImageButton)findViewById(R.id.searchOPT);
-        imageButtons[4] = (ImageButton)findViewById(R.id.search);
-        imageButtons[5] = (ImageButton)findViewById(R.id.tts_Setting);
+        imageButtons[0] = (ImageButton)findViewById(R.id.addressInfo);
+        //imageButtons[1] = (ImageButton)findViewById(R.id.add_loc);
+        imageButtons[1] = (ImageButton)findViewById(R.id.안내방식);
+        imageButtons[2] = (ImageButton)findViewById(R.id.searchOPT);
+        imageButtons[3] = (ImageButton)findViewById(R.id.search);
+        imageButtons[4] = (ImageButton)findViewById(R.id.settings);
         setAccessibilityIgnore(current_Text);
     }
 
@@ -193,12 +194,14 @@ public class MainActivity extends AppCompatActivity implements
     }
     public void OnOptionClicked(View view) {//
         switch (view.getId()){
-            case R.id.tracking:
-                search_Mode = false;
-                String url = localSeeker.getNearPlace(lat, lng);
-                JsonFormatPs ps = new JsonFormatPs();
-                ps.execute("NEAR", url);
-                _tts.speak("주변 건물 검색 모드가 설정되었습니다.", TextToSpeech.QUEUE_FLUSH, null);
+            case R.id.addressInfo:
+                String currentLOC = current_Text.getText().toString();
+                _tts.speak(currentLOC, TextToSpeech.QUEUE_FLUSH, null);
+                break;
+            case R.id.add_loc:
+                Register_LOC_Dlg reg_loc = new Register_LOC_Dlg(this, keys, values, lat, lng);
+                reg_loc.show();
+                reg_loc.setCanceledOnTouchOutside(false);
                 break;
             case R.id.searchOPT:
                 search_Mode = true;
@@ -206,17 +209,28 @@ public class MainActivity extends AppCompatActivity implements
                 _tts.speak("검색하려는 타입과 반경을 스크롤하여 선택해주세요.", TextToSpeech.QUEUE_FLUSH, null);
                 break;
             case R.id.search:
-                if(search_Mode == true) {
+                if(types.equals("buildings")){
+                    search_Mode = false;
+                    String url = localSeeker.getNearPlace(lat, lng);
+                    JsonFormatPs ps = new JsonFormatPs();
+                    ps.execute("NEAR", url);
+                    _tts.speak("검색결과가 갱신되었습니다.", TextToSpeech.QUEUE_FLUSH, null);
+                    flipper.showNext();
+                    menu_flipeper.showNext();
+                }
+                else {
+                    search_Mode = true;
                     name = nameText.getText().toString();
-                    url = localSeeker.searchPlace(lat, lng, radius, types, name);
-                    ps = new JsonFormatPs();
+                    String url = localSeeker.searchPlace(lat, lng, radius, types, name);
+                    JsonFormatPs ps = new JsonFormatPs(); //
                     Log.d("URL: ", url);
                     ps.execute("SEARCH", url);
                     _tts.speak("검색결과가 갱신되었습니다.", TextToSpeech.QUEUE_FLUSH, null);
                     flipper.showNext();
+                    menu_flipeper.showNext();
                 }
                 break;
-            case R.id.tts_Setting:
+            case R.id.settings: break;
         }
     }
 
@@ -356,13 +370,17 @@ public class MainActivity extends AppCompatActivity implements
     protected void onStart() {super.onStart();}
     @Override
     protected void onStop() {super.onStop();}
-    public void onInfoClicked(View view) { /* 리스트뷰 띄우기 */ flipper.showNext();
-        for(int i=0; i<6; i++)
+    public void onInfoClicked(View view) { /* 리스트뷰 띄우기 */
+        flipper.showNext();
+        menu_flipeper.showNext();
+        for(int i=0; i<5; i++)
             setAccessibilityIgnore(imageButtons[i]);
         setAccessibilityIgnore(nameText);
     }
-    public void onexitClicked(View view) { /* 지도복귀 */ flipper.showPrevious();
-        for(int i=0; i<6; i++)
+    public void onexitClicked(View view) { /* 지도복귀 */
+        flipper.showPrevious();
+        menu_flipeper.showPrevious();
+        for(int i=0; i<5; i++)
             setAccessibilitySetting(imageButtons[i]);
         setAccessibilitySetting(nameText);
     }
