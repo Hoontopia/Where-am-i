@@ -1,0 +1,79 @@
+<?xml version="1.0" encoding="utf-8"?>
+<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    android:layout_width="fill_parent"
+    android:layout_height="fill_parent"
+    android:orientation="vertical"
+    android:padding="10dp">
+
+    <ViewFlipper
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:id="@+id/picker_flipper">
+
+        <LinearLayout
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:orientation="horizontal"
+        android:weightSum="1"
+        android:paddingLeft="15dp"
+            android:gravity="center_horizontal">
+
+
+        <NumberPicker
+            android:contentDescription="타입 설정"
+            android:id="@+id/type_picker"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_alignParentTop="true"
+            android:layout_centerHorizontal="true"
+            android:contextClickable="false"
+            android:clickable="false" />
+        </LinearLayout>
+
+        <LinearLayout
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:orientation="horizontal"
+            android:weightSum="1"
+            android:paddingLeft="15dp"
+            android:gravity="center_horizontal">
+
+            <NumberPicker
+                android:contentDescription="검색반경 설정"
+                android:id="@+id/radius_picker"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_alignParentTop="true"
+                android:layout_centerHorizontal="true"
+                />
+            </LinearLayout>
+        </ViewFlipper>
+
+    <LinearLayout
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:orientation="horizontal"
+        android:layout_marginTop="30dp">
+
+        <Button
+        android:id="@+id/ok_search"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_marginRight="8dp"
+        android:text="Ok"
+        android:layout_gravity="bottom"
+            android:layout_weight="1"
+            android:layout_marginLeft="16dp" />
+
+        <Button
+            android:id="@+id/cancel_search"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_marginLeft="8dp"
+            android:text="Cancel"
+            android:layout_gravity="bottom"
+            android:layout_weight="1"
+            android:layout_marginRight="16dp" />
+    </LinearLayout>
+
+</LinearLayout>
