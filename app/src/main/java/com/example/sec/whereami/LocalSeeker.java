@@ -28,11 +28,8 @@ public class LocalSeeker {
         return "https://maps.googleapis.com/maps/api/geocode/json?" +
                 "latlng=" + lat + "," + lng + "&" +
                 "language=ko" + "&" +
-                "location_type=ROOFTOP" + "&" +
-                "result_type=premise" + "&" +
                 "key=" + API_Key.GOOGLE_KEY;
     }
-    //"result_type=premise" + "&" +
     /* Url로부터 JSON DATA받아오기 */
     public String downloadFromUrl(String strUrl){
         StringBuilder sb = new StringBuilder();
@@ -62,12 +59,64 @@ public class LocalSeeker {
     }
     /* 위도 경도를 이용해 각도를 계산하는 함수 */
     public int bearingP1toP2(double P1_latitude, double P1_longitude, double P2_latitude, double P2_longitude, float cps) {
-        double y = Math.sin(Math.abs(P2_longitude-P1_longitude)) * Math.cos(P2_latitude);
-        double x = Math.cos(P1_latitude)*Math.sin(P2_latitude) -
-                   Math.sin(P1_latitude)*Math.cos(P2_latitude)*Math.cos(Math.abs(P2_longitude-P1_longitude));
-        double result = Math.atan2(y, x) - cps*Math.PI/180;
-        result = (result*180/Math.PI+360)%360;
-        return (int)(result/30.0);
+        double seta = getSeta(P1_latitude, P1_longitude, P2_latitude, P2_longitude);
+
+        if(seta == cps) {
+            return whatIsClockDir(seta);
+        }
+        else if(seta < cps) {
+            return whatIsClockDir(seta - cps + 360);
+        }
+        else {
+            return whatIsClockDir(seta-cps);
+        }
+    }
+
+    public int whatIsClockDir(double seta) {
+        int result = 12;
+        if(345 < seta || seta <= 15){
+            result = 12;
+        }else if(15 < seta && seta <= 45){
+            result = 1;
+        }else if(45 < seta && seta <= 75){
+            result = 2;
+        }else if(75 < seta && seta <= 105){
+            result = 3;
+        }else if(105 < seta && seta <= 135){
+            result = 4;
+        }else if(135 < seta && seta <= 165){
+            result = 5;
+        }else if(165 < seta && seta <= 195){
+            result = 6;
+        }else if(195 < seta && seta <= 225){
+            result = 7;
+        }else if(225 < seta && seta <= 255){
+            result = 8;
+        }else if(255 < seta && seta <= 285){
+            result = 9;
+        }else if(285 < seta && seta <= 315){
+            result = 10;
+        }else if(315 < seta && seta <= 345){
+            result = 11;
+        }
+        return result;
+    }
+
+    public double getSeta(double P1_latitude, double P1_longitude, double P2_latitude, double P2_longitude) {
+        double Lat1, Long1, Lat2, Long2;
+        double y,x;
+        double ret;
+        Lat1 = Math.toRadians(P1_latitude);
+        Long1 = Math.toRadians(P1_longitude);
+        Lat2 = Math.toRadians(P2_latitude);
+        Long2 = Math.toRadians(P2_longitude);
+
+        y = Math.sin(Long2 - Long1) * Math.cos(Lat2);
+        x = Math.cos(Lat1) * Math.sin(Lat2) - Math.sin(Lat1) * Math.cos(Lat2) * Math.cos(Long2 - Long1);
+
+        ret = Math.atan2(y,x);
+        return Math.toDegrees(ret);
+
     }
     /* 위도 경도를 이용해 거리를 계산하는 함수 */
     public int calDistance(double lat1, double lon1, double lat2, double lon2){
@@ -86,24 +135,4 @@ public class LocalSeeker {
     private double deg2rad(double deg){ return (double)(deg * Math.PI / (double)180d);}
     // 주어진 라디언(radian) 값을 도(degree) 값으로 변환
     private double rad2deg(double rad){ return (double)(rad * (double)180d / Math.PI);}
-
-
-    public double DegreeBearing(double lat1, double lng1, double lat2, double lng2) {
-        double dLon = ToRad(lng2-lng1);
-        double dPhi = Math.log(Math.tan(ToRad(lat2)/2+M_PI/4) / Math.tan(ToRad(lat1))/2+M_PI/4);
-        if(Math.abs(dLon) > M_PI)
-            dLon = dLon > 0 ? - (2 * M_PI - dLon) : (2 * M_PI + dLon);
-        return Math.atan2(dLon, dPhi);
-    }
-
-    double ToRad(double degrees) {
-        return degrees * (M_PI / 180);
-    }
-    double ToDegrees(double radians) {
-        return radians * 180 / M_PI;
-    }
-    double ToBearing(double radians) {
-        int temp = (int)ToDegrees(radians) + 360;
-        return temp % 360;
-    }
 }

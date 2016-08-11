@@ -20,6 +20,7 @@ public class PickerDlg extends Dialog implements TextToSpeech.OnInitListener {
     final int range = 100;
     String[] meters;
     ViewFlipper picker_flipper;
+
     public PickerDlg(final Context context, final String[] _keys, final String[] _values, final TextToSpeech _tts) {
         super(context);
         keys = _keys;
@@ -30,61 +31,79 @@ public class PickerDlg extends Dialog implements TextToSpeech.OnInitListener {
             meters[i] = String.valueOf(range * (i+1));
         }
 
-
         this.setTitle("타입 설정");
         this.setContentView(R.layout.picker);
-        Button btnOk = (Button) this.findViewById(R.id.ok_search);
+
+        Button btnOk = (Button) this.findViewById(R.id.set_ok);
         Button btnCancel = (Button) this.findViewById(R.id.cancel_search);
-        final NumberPicker np1 = (NumberPicker) this.findViewById(R.id.type_picker);
-        final NumberPicker np2 = (NumberPicker) this.findViewById(R.id.radius_picker);
+        Button btnPrev = (Button) this.findViewById(R.id.previous);
+        Button btnNext = (Button) this.findViewById(R.id.next);
+
+        final NumberPicker typePicker = (NumberPicker) this.findViewById(R.id.type_picker);
+        final NumberPicker radiousPicker = (NumberPicker) this.findViewById(R.id.radius_picker);
         picker_flipper = (ViewFlipper) this.findViewById(R.id.picker_flipper);
+        radiousPicker.setMaxValue(meters.length-1);
+        radiousPicker.setMinValue(0);
+        radiousPicker.setDisplayedValues(meters);
+        radiousPicker.setWrapSelectorWheel(true);
 
-        np2.setMaxValue(meters.length-1);
-        np2.setMinValue(0);
-        np2.setDisplayedValues(meters);
-        np2.setWrapSelectorWheel(true);
+        typePicker.setMaxValue(keys.length-1);
+        typePicker.setMinValue(0);
+        typePicker.setWrapSelectorWheel(true);
+        typePicker.setDisplayedValues(keys);
 
-        np1.setMaxValue(keys.length-1);
-        np1.setMinValue(0);
-        np1.setWrapSelectorWheel(true);
-        np1.setDisplayedValues(keys);
+        typePicker.setImportantForAccessibility(View.IMPORTANT_FOR_ACCESSIBILITY_NO_HIDE_DESCENDANTS);
+        radiousPicker.setImportantForAccessibility(View.IMPORTANT_FOR_ACCESSIBILITY_NO_HIDE_DESCENDANTS);
 
-        np1.setDescendantFocusability(NumberPicker.FOCUS_BLOCK_DESCENDANTS);
-        np2.setDescendantFocusability(NumberPicker.FOCUS_BLOCK_DESCENDANTS);
-        np1.setOnValueChangedListener(new NumberPicker.OnValueChangeListener() {
+        typePicker.setOnValueChangedListener(new NumberPicker.OnValueChangeListener() {
             @Override
             public void onValueChange(NumberPicker picker, int oldVal, int newVal) {
                 _tts.speak(_keys[newVal], TextToSpeech.QUEUE_FLUSH, null);
             }
         });
 
-        np2.setOnValueChangedListener(new NumberPicker.OnValueChangeListener() {
+        radiousPicker.setOnValueChangedListener(new NumberPicker.OnValueChangeListener() {
             @Override
             public void onValueChange(NumberPicker picker, int oldVal, int newVal) {
                 _tts.speak(String.valueOf(meters[newVal]), TextToSpeech.QUEUE_FLUSH, null);
             }
         });
+
         btnOk.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
-                picker_flipper.showNext();
-                setTitle("검색반경 설정");
-                /*
-                valueIdx = np1.getValue();
                 MainActivity.types = values[valueIdx];
                 MainActivity.typename = keys[valueIdx];
-                MainActivity.radius = String.valueOf(np2.getValue());
+                MainActivity.radius = String.valueOf(radiousPicker.getValue());
                 Toast.makeText(context, "설정되었습니다.", Toast.LENGTH_SHORT).show();
-                dismiss();
-                */
-
+                cancel();
+                picker_flipper.showPrevious();
             }
         });
+
         btnCancel.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
                 Toast.makeText(context, "취소 되었습니다.", Toast.LENGTH_SHORT).show();
                 cancel();
+            }
+        });
+
+        btnNext.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                picker_flipper.showNext();
+                setTitle("검색반경 설정");
+                Toast.makeText(context, "스크롤하여 검색반경을 설정해주세요.", Toast.LENGTH_SHORT).show();
+            }
+        });
+
+        btnPrev.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                picker_flipper.showPrevious();
+                setTitle("타입 설정");
+                Toast.makeText(context, "스크롤하여 타입을 설정해주세요.", Toast.LENGTH_SHORT).show();
             }
         });
     }

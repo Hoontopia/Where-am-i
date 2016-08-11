@@ -54,7 +54,9 @@
                 android:hint="검색어를 입력하세요."
                 android:textSize="5pt"
                 android:id="@+id/nameText"
-                android:layout_weight="2" />
+                android:layout_weight="2"
+                android:editable="true"
+                android:onClick="OnOptionClicked" />
 
             <ImageButton
                 android:contentDescription="키워드 검색"

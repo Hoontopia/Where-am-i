@@ -2,6 +2,7 @@ package com.example.sec.whereami;
 
 import android.content.Context;
 import android.content.DialogInterface;
+import android.content.Intent;
 import android.hardware.Sensor;
 import android.hardware.SensorEvent;
 import android.hardware.SensorEventListener;
@@ -10,9 +11,13 @@ import android.net.ConnectivityManager;
 import android.net.NetworkInfo;
 import android.os.AsyncTask;
 import android.os.Bundle;
+import android.speech.RecognitionListener;
+import android.speech.RecognizerIntent;
+import android.speech.SpeechRecognizer;
 import android.speech.tts.TextToSpeech;
 import android.support.v7.app.AlertDialog;
 import android.support.v7.app.AppCompatActivity;
+import android.text.InputType;
 import android.util.Log;
 import android.view.MotionEvent;
 import android.view.View;
@@ -29,10 +34,13 @@ import net.daum.mf.map.api.MapReverseGeoCoder;
 import net.daum.mf.map.api.MapView;
 
 import org.json.simple.parser.JSONParser;
+import org.json.simple.parser.ParseException;
 
+import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.Iterator;
 import java.util.Locale;
+import java.util.NoSuchElementException;
 import java.util.TreeMap;
 
 public class MainActivity extends AppCompatActivity implements
@@ -42,13 +50,16 @@ public class MainActivity extends AppCompatActivity implements
         MapView.MapViewEventListener, /* 맵에 대한 행동을 현재 액티비티에서 관리한다 */
         SensorEventListener
 {
+    final static String default_type_name = "건물";
+    final static String default_type = "buildings";
+    final static String default_radious = "50";
     RelativeLayout container;
     String lat = null;
     String lng = null;
     static String name = null;
-    static String typename = null;
-    static String types = null;
-    static String radius = "50";
+    static String typename = default_type_name;
+    static String types = default_type;
+    static String radius = default_radious;
     String[] keys;
     String[] values;
     LocalSeeker localSeeker;
@@ -64,7 +75,7 @@ public class MainActivity extends AppCompatActivity implements
     CpsManager cpsManager;
     ViewFlipper flipper, menu_flipeper;
     ListView list;
-
+    SpeechRecognizer mRecognizer;
     ImageButton[] imageButtons;
 
     @Override
@@ -105,6 +116,7 @@ public class MainActivity extends AppCompatActivity implements
         menu_flipeper = (ViewFlipper)findViewById(R.id.viewFlipper2);
 
         nameText = (EditText)findViewById(R.id.nameText);
+        nameText.setInputType(InputType.TYPE_NULL); // 가상키보드 숨기기
         current_Text = (TextView)findViewById(R.id.currentLOC);
         cpsManager = new CpsManager();
         mSensorManager = (SensorManager) getSystemService(SENSOR_SERVICE);
@@ -179,6 +191,7 @@ public class MainActivity extends AppCompatActivity implements
         }catch (Exception e){
         }
     }
+
     @Override
     protected void onDestroy() {
         super.onDestroy();
@@ -190,6 +203,31 @@ public class MainActivity extends AppCompatActivity implements
         }catch(Exception e){
         }
     }
+
+    public class Count extends Thread{
+        int time;
+        @Override
+        public void run() {
+            while(!Thread.currentThread().isInterrupted()) {
+                        try {
+                            Thread.sleep(1000);
+                            time++;
+                            if(time==5) {
+                                runOnUiThread(new Runnable() {
+                                    @Override
+                                    public void run() {
+                                        mRecognizer.stopListening();
+                                    }
+                                });
+                                break;
+                            }
+                        } catch (InterruptedException e) {
+                            e.printStackTrace();
+                }
+            }
+        }
+    }
+
     public void OnOptionClicked(View view) {
         switch (view.getId()){
             case R.id.addressInfo:
@@ -203,6 +241,7 @@ public class MainActivity extends AppCompatActivity implements
                 break;
             case R.id.searchOPT:
                 search_Mode = true;
+                pickerDlg.setCancelable(false);
                 pickerDlg.show();
                 _tts.speak("검색하려는 타입과 반경을 스크롤하여 선택해주세요.", TextToSpeech.QUEUE_FLUSH, null);
                 break;
@@ -229,6 +268,48 @@ public class MainActivity extends AppCompatActivity implements
                 }
                 break;
             case R.id.settings: break;
+            case R.id.nameText:
+                Intent i = new Intent(RecognizerIntent.ACTION_RECOGNIZE_SPEECH);
+                i.putExtra(RecognizerIntent.EXTRA_CALLING_PACKAGE, getPackageName());
+                i.putExtra(RecognizerIntent.EXTRA_LANGUAGE, "ko-KR");
+                mRecognizer = SpeechRecognizer.createSpeechRecognizer(this);
+                mRecognizer.setRecognitionListener(new RecognitionListener() {
+                    Count count = new Count();
+                    @Override
+                    public void onReadyForSpeech(Bundle params) {
+                        count.start();
+                    }
+                    @Override
+                    public void onBeginningOfSpeech() {}
+                    @Override
+                    public void onRmsChanged(float rmsdB) {}
+                    @Override
+                    public void onBufferReceived(byte[] buffer) {}
+                    @Override
+                    public void onEndOfSpeech() {}
+                    @Override
+                    public void onError(int error) {}
+                    @Override
+                    public void onResults(Bundle results) {
+                        String key = "";
+                        key = SpeechRecognizer.RESULTS_RECOGNITION;
+                        ArrayList<String> mResult = results.getStringArrayList(key);
+                        String[] rs = new String[mResult.size()];
+                        mResult.toArray(rs);
+                        nameText.setText(""+rs[0]);
+                        String temp = nameText.getText().toString();
+                        if(temp.isEmpty()){_tts.speak("입력된 내용이 없습니다.", TextToSpeech.QUEUE_FLUSH, null);}
+                        else{_tts.speak("입력된 내용은 "+temp+" 입니다.", TextToSpeech.QUEUE_FLUSH, null);}
+                        count.interrupt();
+                        mRecognizer.destroy();
+                    }
+                    @Override
+                    public void onPartialResults(Bundle partialResults) {}
+                    @Override
+                    public void onEvent(int eventType, Bundle params) {}
+                });
+                mRecognizer.startListening(i);
+                break;
         }
     }
 
@@ -236,6 +317,7 @@ public class MainActivity extends AppCompatActivity implements
     public void onMapViewInitialized(MapView mapView) {
         mapView.setCurrentLocationTrackingMode(MapView.CurrentLocationTrackingMode.TrackingModeOnWithHeading); // 좌표 추적모드 On
     }
+
     /* 인터넷이 켜저있는지 확인하는 함수 */
     private boolean isNetworkAvailable() {
         boolean available = false;
@@ -245,6 +327,7 @@ public class MainActivity extends AppCompatActivity implements
             available = true;
         return available;
     }
+
     @Override
     public void onSensorChanged(SensorEvent event) {
         if (event.sensor.getType() == Sensor.TYPE_ORIENTATION) {
@@ -252,6 +335,7 @@ public class MainActivity extends AppCompatActivity implements
             //Log.d("방위각: ", String.valueOf(event.values[0]));
         }
     }
+
     private class JsonFormatPs extends AsyncTask<String, Integer, String> {
         String jsonInfo = null;
         @Override
@@ -275,12 +359,19 @@ public class MainActivity extends AppCompatActivity implements
 
         /* Google Place API를 위한 함수 */
         public void searchPlacePs(String jsonData) {
+            String address[];
+            GeoList geoList;
             try {
                 JSONParser jsonParser = new JSONParser();
-                org.json.simple.JSONObject jsonObject = (org.json.simple.JSONObject) jsonParser.parse(jsonData);
+                org.json.simple.JSONObject jsonObject = null;
+                try {
+                    jsonObject = (org.json.simple.JSONObject) jsonParser.parse(jsonData);
+                } catch (ParseException e) {
+                    e.printStackTrace();
+                }
                 org.json.simple.JSONArray result = (org.json.simple.JSONArray) jsonObject.get("results");
-                String address[] = new String[result.size()+1];
-                address[0] = "주변 "+ radius + "미터 안의 " + types + "검색결과";
+                address= new String[result.size()+1];
+                address[0] = "주변 "+ radius + "미터 안의 " + typename + " 검색결과";
                 int addridx = 1;
                 for(int i=0; i<result.size(); i++) {
                     org.json.simple.JSONObject testObject = (org.json.simple.JSONObject) result.get(i);
@@ -295,26 +386,36 @@ public class MainActivity extends AppCompatActivity implements
                     int dirs = localSeeker.bearingP1toP2(Double.parseDouble(lat), Double.parseDouble(lng), (double)loc.get("lat"), (double)loc.get("lng"), cpsManager.getAzimuth());
                     res += "  " + String.valueOf(dist) + "미터";
                     res += "  " + String.valueOf(dirs) + "시방향";
-                    Toast.makeText(getApplicationContext(),"result: " + res, Toast.LENGTH_SHORT).show();
+                   // Toast.makeText(getApplicationContext(),"result: " + res, Toast.LENGTH_SHORT).show();
                     address[addridx++] = res;
                 }
-                GeoList geoList = new GeoList(MainActivity.this, address);// 추가
-                list.setAdapter(geoList);// 추가
-            }catch (Exception e) {
-                e.printStackTrace();
+            }catch (NoSuchElementException e) {
+                address = new String[2];
+                address[0] = "주변 " + radius + "미터 안의 " + typename + " 검색결과";
+                address[1] = "검색된 결과가 없습니다.";
             }
+            geoList = new GeoList(MainActivity.this, address);// 추가
+            list.setAdapter(geoList);// 추가
         }
+
         /* Google Geo API를 위한 함수 */
         public void nearPlacePs(String jsonData) {
+            String address[];
+            GeoList geoList;
             HashMap<Integer, String> hashMap = new HashMap();
 
             try{
                 JSONParser jsonParser = new JSONParser();
-                org.json.simple.JSONObject jsonObject = (org.json.simple.JSONObject) jsonParser.parse(jsonData);
+                org.json.simple.JSONObject jsonObject = null;
+                try {
+                    jsonObject = (org.json.simple.JSONObject) jsonParser.parse(jsonData);
+                } catch (ParseException e) {
+                    e.printStackTrace();
+                }
                 org.json.simple.JSONArray result = (org.json.simple.JSONArray) jsonObject.get("results");
-                String address[] = new String[result.size()+1];
+                address = new String[result.size()+1];
                 int addridx = 1;
-                address[0] = "주변 건물 검색결과";
+                address[0] = "주변 " + radius + "미터 안의 " + typename + " 검색결과";
                 for(int i=0; i<result.size(); i++) {
                     org.json.simple.JSONObject object = (org.json.simple.JSONObject)result.get(i);
 
@@ -330,10 +431,14 @@ public class MainActivity extends AppCompatActivity implements
                         continue;
 
                     int dist = localSeeker.calDistance(Double.parseDouble(lat), Double.parseDouble(lng), (double)loc.get("lat"), (double)loc.get("lng"));
+
+                    if(dist > 300)
+                        continue;
+
                     int dirs = localSeeker.bearingP1toP2(Double.parseDouble(lat), Double.parseDouble(lng), (double)loc.get("lat"), (double)loc.get("lng"), cpsManager.getAzimuth());
                     res += "  " + String.valueOf(dist) + "미터";
                     res += "  " + String.valueOf(dirs) + "시방향";
-                    Toast.makeText(getApplicationContext(),"result: " + res, Toast.LENGTH_SHORT).show();
+                   // Toast.makeText(getApplicationContext(),"result: " + res, Toast.LENGTH_SHORT).show();
                     address[addridx++] = res;
                     hashMap.put(dist,formatted_address);
                 }
@@ -345,11 +450,13 @@ public class MainActivity extends AppCompatActivity implements
                 String value = treeMap.get( key );
                 current_Text.setText(value);
 
-                GeoList geoList = new GeoList(MainActivity.this, address);
-                list.setAdapter(geoList);// 추가
-            } catch (Exception e) {
-                e.printStackTrace();
+            } catch (NoSuchElementException e) {
+                address = new String[2];
+                address[0] = "주변 " + radius + "미터 안의 " + typename + " 검색결과";
+                address[1] = "검색된 결과가 없습니다.";
             }
+            geoList = new GeoList(MainActivity.this, address);
+            list.setAdapter(geoList);// 추가
         }
     }
     public static boolean isStringDouble(String s) {
