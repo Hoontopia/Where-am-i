@@ -12,7 +12,7 @@ import android.widget.TextView;
  */
 public class GeoList extends ArrayAdapter<String>{
     private final Activity context;
-    String address[];
+    private String address[];
     public GeoList(Activity context, String[] address) {
         super(context, R.layout.list_item, address);
         this.address = address;

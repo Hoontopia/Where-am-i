@@ -1,6 +1,5 @@
 <resources>
     <string name="app_name">WhereAmI</string>
-
     <string-array name="myvariablename_keys">
         <item>건물</item>
         <item>공항</item>
